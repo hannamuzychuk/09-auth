@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextServer } from "./api";
-import { Note} from "@/types/note";
+import { Note } from "@/types/note";
 import { User } from "@/types/user";
 
 export interface FetchNotesResponse {
@@ -8,10 +8,12 @@ export interface FetchNotesResponse {
   totalPages: number;
 }
 
-export const fetchNotesServer = async (page: number, tag?: string) => {
-  const cookieStore = cookies(); 
+// Приватні запити для SSR / серверних компонентів
 
-  const { data } = await NextServer.get(`/notes`, {
+export const fetchNotesServer = async (page: number, tag?: string) => {
+  const cookieStore = cookies();
+
+  const { data } = await NextServer.get<FetchNotesResponse>("/notes", {
     headers: { Cookie: cookieStore.toString() },
     params: { page, perPage: 12, ...(tag && { tag }) },
   });
@@ -21,22 +23,28 @@ export const fetchNotesServer = async (page: number, tag?: string) => {
 
 export const fetchNoteById = async (id: string): Promise<Note> => {
   const cookieStore = cookies();
-  const res = await NextServer.get(`/notes/${id}`, { headers: { Cookie: cookieStore.toString() } });
-  return res.data;
+  const { data } = await NextServer.get<Note>(`/notes/${id}`, {
+    headers: { Cookie: cookieStore.toString() },
+  });
+  return data;
 };
-
 
 export const getMe = async (): Promise<User> => {
   const cookieStore = cookies();
-  const res = await NextServer.get("/users/me", { headers: { Cookie: cookieStore.toString() } });
-  return res.data;
+  const { data } = await NextServer.get<User>("/users/me", {
+    headers: { Cookie: cookieStore.toString() },
+  });
+  return data;
 };
 
+// Перевірка сесії користувача для proxy
 export const checkSession = async (): Promise<User | null> => {
   const cookieStore = cookies();
   try {
-    const res = await NextServer.get("/auth/session", { headers: { Cookie: cookieStore.toString() } });
-    return res.data || null;
+    const { data } = await NextServer.get<User | null>("/auth/session", {
+      headers: { Cookie: cookieStore.toString() },
+    });
+    return data;
   } catch {
     return null;
   }
