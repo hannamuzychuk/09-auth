@@ -6,7 +6,7 @@ import { useState } from "react";
 import { register } from "@/lib/api/clientApi";
 import {  RegisterRequest } from "@/lib/api/clientApi";
 import { useAuthStore } from "@/lib/store/authStore";
-import css from "./SingUpPage.module.css";
+import css from "./SignUpPage.module.css";
 
 export default function SignUp () {
     const router = useRouter();
