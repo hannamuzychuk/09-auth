@@ -1,7 +1,7 @@
 "use client";
 
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
-import { fetchNotes, FetchNotesResponse } from "@/lib/api";
+import { fetchNotes, FetchNotesResponse } from "@/lib/api/clientApi";
 import { useState } from "react";
 import { useDebouncedCallback } from "use-debounce";
 import SearchBox from "@/components/SearchBox/SearchBox";
@@ -33,12 +33,15 @@ export default function NotesClient({ activeTag }: NotesClientProps) {
     debouncedSearch(value);
   };
 
-  const { data, isError } = useQuery<FetchNotesResponse>({
+  const { data, isError, isLoading } = useQuery<FetchNotesResponse>({
     queryKey: ["notes", page, search, (activeTag ?? "") as NoteTag],
     queryFn: () => fetchNotes(page, search, (activeTag ?? "") as NoteTag),
     placeholderData: keepPreviousData,
     refetchOnMount: false,
   });
+
+const notes = data?.notes ?? []; 
+  const totalPages = data?.totalPages ?? 0;
 
   return (
     <div className={css.app}>
@@ -48,9 +51,9 @@ export default function NotesClient({ activeTag }: NotesClientProps) {
 
         {isError && <p>Something went wrong while fetching notes.</p>}
 
-        {data && data.totalPages > 1 && (
+        {totalPages > 1 && (
           <Pagination
-            pageCount={data.totalPages}
+            pageCount={totalPages}
             currentPage={page}
             onPageChange={setPage}
           />
@@ -60,13 +63,14 @@ export default function NotesClient({ activeTag }: NotesClientProps) {
           Create note +
         </Link>
       </header>
-
-      {data &&
-        (data.notes.length > 0 ? (
-          <NoteList notes={data.notes} />
-        ) : (
-          <p>No notes found.</p>
-        ))}
+      
+   {isLoading ? (
+        <p>Loading notes...</p>
+      ) : notes.length > 0 ? (
+        <NoteList notes={notes} />
+      ) : (
+        <p>No notes found.</p>
+      )}
     </div>
   );
 }
