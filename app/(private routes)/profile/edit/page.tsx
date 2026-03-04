@@ -1,6 +1,6 @@
 "use client";
 
-import css from "./page.module.css";
+import css from "./EditPage.module.css";
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { useAuthStore } from '@/lib/store/authStore';
