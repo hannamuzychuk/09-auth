@@ -10,7 +10,15 @@ export interface FetchNotesResponse {
 }
 
 
-export const fetchNotes = async (page: number, tag?: string, activeTag?: string | undefined) => {
+export const fetchNotes = async ({
+  page,
+  tag,
+  activeTag,
+}: {
+  page: number;
+  tag?: string;
+  activeTag?: string;
+}) => {
   const cookieStore = cookies();
 
   const { data } = await NextServer.get<FetchNotesResponse>("/notes", {
@@ -36,7 +44,6 @@ export const getMe = async (): Promise<User> => {
   });
   return data;
 };
-
 export const checkSession = async (): Promise<AxiosResponse<User>> => {
   const cookieStore = cookies();
 

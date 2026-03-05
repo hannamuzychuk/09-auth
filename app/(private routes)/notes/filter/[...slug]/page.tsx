@@ -50,10 +50,10 @@ export default async function FilterPage({ params }: FilterPageProps) {
 
   const queryClient = new QueryClient();
 
-  await queryClient.prefetchQuery({
-    queryKey: ["notes", 1, "", activeTag],
-    queryFn: () => fetchNotes(1, "", activeTag), 
-  });
+ await queryClient.prefetchQuery({
+  queryKey: ["notes", 1, "", activeTag],
+  queryFn: () => fetchNotes({ page: 1, tag: "", activeTag }),
+});
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>

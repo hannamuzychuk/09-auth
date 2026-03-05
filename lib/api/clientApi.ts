@@ -62,7 +62,7 @@ export const register = async (data: RegisterRequest): Promise<User> => {
 };
 
 export const login = async (data: LoginRequest): Promise<User> => {
-  const { data: user } = await NextServer.post<User>("/auth/login", data); // виправлено дженерик <User>
+  const { data: user } = await NextServer.post<User>("/auth/login", data); 
   return user;
 };
 
@@ -71,12 +71,12 @@ export const logout = async (): Promise<void> => {
 };
 
 export const updateMe = async (username: string): Promise<User> => {
-  const { data } = await NextServer.patch<User>("/users/me", { username }); // виправлено ендпоінт
+  const { data } = await NextServer.patch<User>("/users/me", { username });
   return data;
 };
 
 export const checkSession = async (): Promise<User> => {
-  const { data } = await NextServer.get<User>("/auth/session"); // User, не null
+  const { data } = await NextServer.get<User>("/auth/session"); 
   return data;
 };
 
