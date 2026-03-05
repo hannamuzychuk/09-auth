@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { api } from '../../api';
 import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
-import { logErrorResponse } from '../../_utils/utils';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,21 +16,14 @@ export async function GET() {
     });
 
     return NextResponse.json(res.data, { status: res.status });
-
   } catch (error) {
-    if (isAxiosError(error)) {
-      logErrorResponse(error);
-
-      return NextResponse.json(
-        { error: error.message},
-        { status: error.status ?? 500 }
-      );
+    if (isAxiosError(error) && error.response) {
+      console.error('API Error:', error.response.data);
+      return NextResponse.json(error.response.data, { status: error.response.status });
     }
 
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    console.error('Unexpected Error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
@@ -48,18 +40,12 @@ export async function PATCH(request: Request) {
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
-    if (isAxiosError(error)) {
-      logErrorResponse(error);
-      
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.status ?? 500 }
-      );
+    if (isAxiosError(error) && error.response) {
+      console.error('API Error:', error.response.data);
+      return NextResponse.json(error.response.data, { status: error.response.status });
     }
 
-    return NextResponse.json(
-      { error: 'Internal Server Error' },
-      { status: 500 }
-    );
+    console.error('Unexpected Error:', error);
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }

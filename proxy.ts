@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { checkSession, refreshSession } from "@/lib/api/serverApi";
+import { cookies } from "next/headers";
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
@@ -7,8 +8,9 @@ export async function proxy(req: NextRequest) {
   const isPrivateRoute = pathname.startsWith("/profile") || pathname.startsWith("/notes");
   const isAuthRoute = pathname.startsWith("/sign-in") || pathname.startsWith("/sign-up");
 
-  const accessToken = req.cookies.get("accessToken")?.value || null;
-  const refreshToken = req.cookies.get("refreshToken")?.value || null;
+  const cookieStore = await cookies();
+  const accessToken = cookieStore.get("accessToken")?.value || null;
+  const refreshToken = cookieStore.get("refreshToken")?.value || null;
 
   let session = null;
 
