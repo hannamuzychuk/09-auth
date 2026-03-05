@@ -2,15 +2,15 @@ import { cookies } from "next/headers";
 import { NextServer } from "./api";
 import { Note } from "@/types/note";
 import { User } from "@/types/user";
+import { AxiosResponse } from "axios";
 
 export interface FetchNotesResponse {
   notes: Note[];
   totalPages: number;
 }
 
-// Приватні запити для SSR / серверних компонентів
 
-export const fetchNotesServer = async (page: number, tag?: string) => {
+export const fetchNotes = async (page: number, tag?: string, activeTag?: string | undefined) => {
   const cookieStore = cookies();
 
   const { data } = await NextServer.get<FetchNotesResponse>("/notes", {
@@ -37,13 +37,25 @@ export const getMe = async (): Promise<User> => {
   return data;
 };
 
-// Перевірка сесії користувача для proxy
-export const checkSession = async (): Promise<User | null> => {
+export const checkSession = async (): Promise<AxiosResponse<User>> => {
   const cookieStore = cookies();
+
+   const response = await NextServer.get<User>("/auth/session", {
+    headers: {
+      Cookie: cookieStore.toString(),
+    },
+  });
+
+  return response;
+};
+
+export const refreshSession = async (refreshToken: string) => {
   try {
-    const { data } = await NextServer.get<User | null>("/auth/session", {
-      headers: { Cookie: cookieStore.toString() },
-    });
+    const { data } = await NextServer.post<{
+      accessToken: string;
+      refreshToken: string;
+    }>("/auth/refresh", {}, { headers: { Authorization: `Bearer ${refreshToken}` } });
+
     return data;
   } catch {
     return null;

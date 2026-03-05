@@ -17,7 +17,6 @@ interface NotesClientProps {
 }
 
 export default function NotesClient({ activeTag }: NotesClientProps) {
-  // const [isOpen, setIsOpen] = useState(false);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [searchInput, setSearchInput] = useState("");

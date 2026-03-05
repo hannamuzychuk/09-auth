@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { api } from '../../api';
 import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../../_utils/utils';
+
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
@@ -14,16 +17,17 @@ export async function GET() {
     });
 
     return NextResponse.json(res.data, { status: res.status });
+
   } catch (error) {
     if (isAxiosError(error)) {
-      console.error('Axios Error:', error.response?.data);
+      logErrorResponse(error);
+
       return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.response?.status ?? 500 }
+        { error: error.message},
+        { status: error.status ?? 500 }
       );
     }
 
-    console.error('Unexpected Error:', (error as Error).message);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }
@@ -45,14 +49,14 @@ export async function PATCH(request: Request) {
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
-      console.error('Axios Error:', error.response?.data);
+      logErrorResponse(error);
+      
       return NextResponse.json(
-        { error: error.message, response: error.response?.data },
-        { status: error.response?.status ?? 500 }
+        { error: error.message },
+        { status: error.status ?? 500 }
       );
     }
 
-    console.error('Unexpected Error:', (error as Error).message);
     return NextResponse.json(
       { error: 'Internal Server Error' },
       { status: 500 }

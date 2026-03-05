@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { api } from '../api';
 import { cookies } from 'next/headers';
 import { isAxiosError } from 'axios';
+import { logErrorResponse } from '../_utils/utils';
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,20 +28,23 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
     if (isAxiosError(error)) {
-      const message = getErrorMessage(error);
+        logErrorResponse(error);
       
       return NextResponse.json(
-         { error: message, response: isAxiosError(error) ? error.response?.data : undefined },
-      { status: isAxiosError(error) ? error.response?.status ?? 500 : 500 }
-    )
+        { error: error.response?.data?.error ?? 'Request failed' },
+        { status: error.response?.status ?? 500 }
+      );
     }
+     return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-
     const body = await request.json();
 
     const res = await api.post('/notes', body, {
@@ -52,18 +56,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(res.data, { status: res.status });
   } catch (error) {
-      const message = getErrorMessage(error);
+    if (isAxiosError(error)) {
+      logErrorResponse(error);
+        
       return NextResponse.json(
-         { error: message, response: isAxiosError(error) ? error.response?.data : undefined },
-      { status: isAxiosError(error) ? error.response?.status ?? 500 : 500 }
-    );
+        { error: error.response?.data?.error ?? 'Request failed' },
+        { status: error.response?.status ?? 500 }
+      );
     }
+     return NextResponse.json(
+      { error: 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
 }
-
-function getErrorMessage(error: unknown): string {
-  if (typeof error === 'string') return error;
-  if (error instanceof Error) return error.message;
-  return 'Unknown error';
-}
-
-

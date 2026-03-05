@@ -1,6 +1,6 @@
 'use client';
 
-import { ApiError } from "../../api/api";
+import { ApiError } from "@/lib/api/clientApi";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { register } from "@/lib/api/clientApi";
@@ -13,7 +13,7 @@ export default function SignUp () {
     const [error, setError] = useState("");
     const setUser = useAuthStore((state) => state.setUser);
     
-    const handleSumbit = async (formData: FormData) => {
+    const handleSubmit = async (formData: FormData) => {
         try {
             const formValues = Object.fromEntries(
                 formData,
@@ -38,7 +38,7 @@ export default function SignUp () {
             <>
                <main className={css.mainContent}>
   <h1 className={css.formTitle}>Sign up</h1>
-	<form className={css.form} action={handleSumbit}>
+	<form className={css.form} action={handleSubmit}>
     <div className={css.formGroup}>
       <label htmlFor="email">Email</label>
       <input id="email" type="email" name="email" className={css.input} required />
