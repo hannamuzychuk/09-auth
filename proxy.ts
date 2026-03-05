@@ -13,7 +13,7 @@ export async function proxy(req: NextRequest) {
   let session = null;
 
   if (accessToken) {
-    session = await checkSession(accessToken);
+    session = await checkSession();
   }
 
   if (!session && refreshToken) {
@@ -25,7 +25,7 @@ export async function proxy(req: NextRequest) {
       response.cookies.set("accessToken", newAccessToken, { httpOnly: true, path: "/" });
       response.cookies.set("refreshToken", newRefreshToken, { httpOnly: true, path: "/" });
 
-      session = await checkSession(newAccessToken);
+      session = await checkSession();
 
       if (!session && isPrivateRoute) {
         return NextResponse.redirect(new URL("/sign-in", req.url));
