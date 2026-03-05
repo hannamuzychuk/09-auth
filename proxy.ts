@@ -10,40 +10,59 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const cookieStore = await cookies();
 
-  const accessToken = cookieStore.get('accessToken')?.value;
+  let accessToken = cookieStore.get('accessToken')?.value;
   const refreshToken = cookieStore.get('refreshToken')?.value;
 
   const isPublicRoute = publicRoutes.some(route => pathname.startsWith(route));
   const isPrivateRoute = privateRoutes.some(route => pathname.startsWith(route));
 
-  
+  const response = NextResponse.next();
+
   if (!accessToken) {
     if (refreshToken) {
       try {
         const data = await checkSession();
         const setCookieHeader = data.headers['set-cookie'];
+
         if (setCookieHeader) {
           const cookieArray = Array.isArray(setCookieHeader) ? setCookieHeader : [setCookieHeader];
+
           for (const cookieStr of cookieArray) {
             const parsed = parse(cookieStr);
             for (const [name, value] of Object.entries(parsed)) {
               if (value !== undefined) {
-                cookieStore.set(name, value); 
+                
+                cookieStore.set(name, value);
+
+              
+                response.cookies.set(name, value, {
+                  path: '/', 
+                  httpOnly: true,
+                  sameSite: 'lax',
+                });
+
+              
+                if (name === 'accessToken') {
+                  accessToken = value;
+                }
               }
             }
           }
         }
-      } catch {
-        
+      } catch (err) {
+        console.error('Session refresh failed', err);
       }
     }
 
-    if (isPrivateRoute) return NextResponse.redirect(new URL('/sign-in', request.url));
-    return NextResponse.next(); 
+    if (isPrivateRoute && !accessToken) {
+      return NextResponse.redirect(new URL('/sign-in', request.url));
+    }
+    return response;
   }
 
   if (isPublicRoute) return NextResponse.redirect(new URL('/', request.url));
-  return NextResponse.next(); 
+
+  return response;
 }
 
 export const config = {
